@@ -10,6 +10,7 @@ class CPU:
         """Construct a new CPU."""
         self.reg = [0] * 8
         self.ram = [0] * 256
+        self.pc = 0  # Program Counter
 
     def load(self):
         """Load a program into memory."""
@@ -20,12 +21,12 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
+            0b10000010,  # LDI R0,8 - decimal value is 130
+            0b00000000,  # at ram[0]
+            0b00001000,  # store the value 8
+            0b01000111,  # PRN R0 - decimal value is 71
+            0b00000000,  # print ran[0]
+            0b00000001,  # HLT - decimal value is 1
         ]
 
         for instruction in program:
@@ -69,6 +70,18 @@ class CPU:
 
         print()
 
+    def HLT(self):
+        sys.exit(0)
+
+    def LDI(self, reg_add, value):
+        self.reg[reg_add] = value
+
+    def PRN(self, reg_add):
+        return self.reg[reg_add]
+
     def run(self):
         """Run the CPU."""
-        pass
+        # load the program
+        self.load()
+
+        IR = None  # Instruction Register, contains a copy of the currently executing instruction
