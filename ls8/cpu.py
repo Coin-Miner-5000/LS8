@@ -32,6 +32,14 @@ class CPU:
             self.ram[address] = instruction
             address += 1
 
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self, MAR, MDR):
+        # MAR = Memory Address Register, contains the address that is being read or written to
+        # MDR =  Memory Data Register, contains the data that was read or the data to write
+        self.ram[MAR] = MDR
+
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
