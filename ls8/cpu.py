@@ -84,25 +84,24 @@ class CPU:
         # load the program
         self.load()
 
-        IR = None  # Instruction Register, contains a copy of the currently executing instruction
-
         while True:
-            command = self.ram[self.pc]
-            if command == 130:
+            # Instruction Register, contains a copy of the currently executing instruction
+            IR = self.ram[self.pc]
+            if IR == 130:
                 address = self.ram[self.pc + 1]
                 value = self.ram[self.pc + 2]
                 # store the data
                 self.LDI(address, value)
                 # increment the PC by 2 to skip the arguments
                 self.pc += 3
-            elif command == 71:
+            elif IR == 71:
                 data = self.ram[self.pc + 1]
                 # print the data
                 print(self.PRN(data))
                 # increment the PC by 1 to skip the argument
                 self.pc += 2
-            elif command == 1:
+            elif IR == 1:
                 self.HLT()
             else:
-                print(f"I did not understand that command: {command}")
+                print(f"I did not understand that command: {IR}")
                 sys.exit(1)
