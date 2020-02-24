@@ -22,10 +22,10 @@ class CPU:
         program = [
             # From print8.ls8
             0b10000010,  # LDI R0,8 - decimal value is 130
-            0b00000000,  # at ram[0]
+            0b00000000,  # at reg[0]
             0b00001000,  # store the value 8
             0b01000111,  # PRN R0 - decimal value is 71
-            0b00000000,  # print ran[0]
+            0b00000000,  # print reg[0]
             0b00000001,  # HLT - decimal value is 1
         ]
 
