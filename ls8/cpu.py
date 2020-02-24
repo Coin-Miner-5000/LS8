@@ -3,8 +3,8 @@
 import sys
 
 HLT = 1
-SAVE = 130
-PRINT = 71
+LDI = 130
+PRN = 71
 
 
 class CPU:
@@ -74,12 +74,6 @@ class CPU:
 
         print()
 
-    def LDI(self, reg_add, value):
-        self.reg[reg_add] = value
-
-    def PRN(self, reg_add):
-        return self.reg[reg_add]
-
     def run(self):
         """Run the CPU."""
         # load the program
@@ -88,17 +82,17 @@ class CPU:
         while True:
             # Instruction Register, contains a copy of the currently executing instruction
             IR = self.ram[self.pc]
-            if IR == SAVE:
+            if IR == LDI:
                 address = self.ram[self.pc + 1]
                 value = self.ram[self.pc + 2]
                 # store the data
-                self.LDI(address, value)
+                self.reg[address] = value
                 # increment the PC by 3 to skip the arguments
                 self.pc += 3
-            elif IR == PRINT:
+            elif IR == PRN:
                 data = self.ram[self.pc + 1]
                 # print the data
-                print(self.PRN(data))
+                print(self.reg[data])
                 # increment the PC by 2 to skip the argument
                 self.pc += 2
             elif IR == HLT:
