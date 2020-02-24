@@ -3,6 +3,8 @@
 import sys
 
 HLT = 1
+SAVE = 130
+PRINT = 71
 
 
 class CPU:
@@ -86,14 +88,14 @@ class CPU:
         while True:
             # Instruction Register, contains a copy of the currently executing instruction
             IR = self.ram[self.pc]
-            if IR == 130:
+            if IR == SAVE:
                 address = self.ram[self.pc + 1]
                 value = self.ram[self.pc + 2]
                 # store the data
                 self.LDI(address, value)
                 # increment the PC by 3 to skip the arguments
                 self.pc += 3
-            elif IR == 71:
+            elif IR == PRINT:
                 data = self.ram[self.pc + 1]
                 # print the data
                 print(self.PRN(data))
