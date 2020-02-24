@@ -2,6 +2,8 @@
 
 import sys
 
+HLT = 1
+
 
 class CPU:
     """Main CPU class."""
@@ -70,9 +72,6 @@ class CPU:
 
         print()
 
-    def HLT(self):
-        sys.exit(0)
-
     def LDI(self, reg_add, value):
         self.reg[reg_add] = value
 
@@ -100,8 +99,8 @@ class CPU:
                 print(self.PRN(data))
                 # increment the PC by 2 to skip the argument
                 self.pc += 2
-            elif IR == 1:
-                self.HLT()
+            elif IR == HLT:
+                sys.exit(0)
             else:
                 print(f"I did not understand that command: {IR}")
                 sys.exit(1)
