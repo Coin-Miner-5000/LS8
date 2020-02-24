@@ -92,13 +92,13 @@ class CPU:
                 value = self.ram[self.pc + 2]
                 # store the data
                 self.LDI(address, value)
-                # increment the PC by 2 to skip the arguments
+                # increment the PC by 3 to skip the arguments
                 self.pc += 3
             elif IR == 71:
                 data = self.ram[self.pc + 1]
                 # print the data
                 print(self.PRN(data))
-                # increment the PC by 1 to skip the argument
+                # increment the PC by 2 to skip the argument
                 self.pc += 2
             elif IR == 1:
                 self.HLT()
