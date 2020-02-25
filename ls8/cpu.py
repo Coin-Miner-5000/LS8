@@ -5,6 +5,7 @@ import sys
 HLT = 1
 LDI = 130
 PRN = 71
+MUL = 162
 
 
 class CPU:
@@ -96,6 +97,11 @@ class CPU:
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
+            elif IR == MUL:
+                reg_a = self.ram[self.pc + 1]
+                reg_b = self.ram[self.pc + 2]
+
+                self.reg[reg_a] *= self.reg[reg_b]
             elif IR == HLT:
                 sys.exit(0)
             else:
