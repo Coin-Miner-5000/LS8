@@ -18,24 +18,24 @@ class CPU:
 
     def load(self):
         """Load a program into memory."""
-
+        progname = sys.argv[1]
         address = 0
 
-        # For now, we've just hardcoded a program:
+        with open(progname) as f:
+            # iterate through each line in the program
+            for line in f:
+                # remove any comments
+                line = line.split("#")[0]
+                # remove whitespace
+                line = line.strip()
+                # skip empty lines
+                if line == "":
+                    continue
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8 - decimal value is 130
-            0b00000000,  # at reg[0]
-            0b00001000,  # store the value 8
-            0b01000111,  # PRN R0 - decimal value is 71
-            0b00000000,  # print reg[0]
-            0b00000001,  # HLT - decimal value is 1
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+                value = int(line, 2)
+                # set the instruction to memory
+                self.ram[address] = value
+                address += 1
 
     def ram_read(self, MAR):
         return self.ram[MAR]
