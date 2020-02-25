@@ -82,21 +82,23 @@ class CPU:
         while True:
             # Instruction Register, contains a copy of the currently executing instruction
             IR = self.ram[self.pc]
+            # Grab AA of the program instruction for the operand count
+            operand_count = IR >> 6
+
             if IR == LDI:
                 address = self.ram[self.pc + 1]
                 value = self.ram[self.pc + 2]
                 # store the data
                 self.reg[address] = value
                 # increment the PC by 3 to skip the arguments
-                self.pc += 3
             elif IR == PRN:
                 data = self.ram[self.pc + 1]
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
-                self.pc += 2
             elif IR == HLT:
                 sys.exit(0)
             else:
                 print(f"I did not understand that command: {IR}")
                 sys.exit(1)
+            self.pc += operand_count + 1
