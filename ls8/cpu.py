@@ -6,6 +6,10 @@ HLT = 1
 LDI = 130
 PRN = 71
 MUL = 162
+PUSH = 69
+POP = 70
+
+SP = 7  # Stack Pointer
 
 
 class CPU:
@@ -15,7 +19,10 @@ class CPU:
         """Construct a new CPU."""
         self.reg = [0] * 8
         self.ram = [0] * 256
-        self.pc = 0  # Program Counter
+        # Program Counter
+        self.pc = 0
+        # Stack Pointer, initialized 1 spot above the beginning of stack when empty
+        self.reg[SP] = 0xF4
 
     def load(self):
         """Load a program into memory."""
@@ -39,7 +46,7 @@ class CPU:
                     continue
 
                 value = int(line, 2)
-                # set the instruction to memory
+                # set the binary instruction to memory
                 self.ram[address] = value
                 address += 1
 
@@ -107,6 +114,15 @@ class CPU:
                 reg_b = self.ram_read(self.pc + 2)
 
                 self.reg[reg_a] *= self.reg[reg_b]
+            elif IR == PUSH:
+                # grab the register operand
+                reg = self.ram_read(self.pc + 1)
+                # to get the value in register
+                val = self.reg[reg]
+                # decrement the SP
+                self.reg[SP] -= 1
+                # Copy the value from the given register to RAM at the SP index
+                self.ram_write(self.reg[SP], val)
             elif IR == HLT:
                 sys.exit(0)
             else:
