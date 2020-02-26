@@ -19,6 +19,11 @@ class CPU:
 
     def load(self):
         """Load a program into memory."""
+        # Error handling
+        if len(sys.argv) != 2:
+            print("usage: ls8.py filename")
+            sys.exit(1)
+
         progname = sys.argv[1]
         address = 0
 
@@ -82,24 +87,24 @@ class CPU:
 
         while True:
             # Instruction Register, contains a copy of the currently executing instruction
-            IR = self.ram[self.pc]
+            IR = self.ram_read(self.pc)
             # Grab AA of the program instruction for the operand count
             operand_count = IR >> 6
 
             if IR == LDI:
-                address = self.ram[self.pc + 1]
-                value = self.ram[self.pc + 2]
+                address = self.ram_read(self.pc + 1)
+                value = self.ram_read(self.pc + 2)
                 # store the data
                 self.reg[address] = value
                 # increment the PC by 3 to skip the arguments
             elif IR == PRN:
-                data = self.ram[self.pc + 1]
+                data = self.ram_read(self.pc + 1)
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
             elif IR == MUL:
-                reg_a = self.ram[self.pc + 1]
-                reg_b = self.ram[self.pc + 2]
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(self.pc + 2)
 
                 self.reg[reg_a] *= self.reg[reg_b]
             elif IR == HLT:
