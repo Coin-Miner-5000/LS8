@@ -11,6 +11,8 @@ POP = 70
 CALL = 80
 ADD = 160
 RET = 17
+SUB = None
+DIV = None
 
 SP = 7  # Stack Pointer
 
@@ -64,9 +66,14 @@ class CPU:
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
-        if op == "ADD":
+        if op == ADD:
             self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+        elif op == MUL:
+            self.reg[reg_a] *= self.reg[reg_b]
+        elif op == SUB:
+            self.reg[reg_a] -= self.reg[reg_b]
+        elif op == DIV:
+            self.reg[reg_a] /= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -114,16 +121,11 @@ class CPU:
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
-            elif IR == MUL:
+            elif IR == MUL or IR == ADD:
+                op = IR
                 reg_a = self.ram_read(self.pc + 1)
                 reg_b = self.ram_read(self.pc + 2)
-
-                self.reg[reg_a] *= self.reg[reg_b]
-            elif IR == ADD:
-                reg_a = self.ram_read(self.pc + 1)
-                reg_b = self.ram_read(self.pc + 2)
-
-                self.reg[reg_a] += self.reg[reg_b]
+                self.alu(op, reg_a, reg_b)
             elif IR == PUSH:
                 # grab the register operand
                 reg = self.ram_read(self.pc + 1)
