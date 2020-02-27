@@ -8,6 +8,9 @@ PRN = 71
 MUL = 162
 PUSH = 69
 POP = 70
+CALL = 80
+ADD = 160
+RET = 17
 
 SP = 7  # Stack Pointer
 
@@ -96,7 +99,9 @@ class CPU:
             # Instruction Register, contains a copy of the currently executing instruction
             IR = self.ram_read(self.pc)
             # Grab AA of the program instruction for the operand count
+            # Grab C of the program instruction for if the instruction sets PC counter
             operand_count = IR >> 6
+            sets_pc = IR >> 4 & 0b0001
 
             if IR == LDI:
                 address = self.ram_read(self.pc + 1)
@@ -114,6 +119,11 @@ class CPU:
                 reg_b = self.ram_read(self.pc + 2)
 
                 self.reg[reg_a] *= self.reg[reg_b]
+            elif IR == ADD:
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(self.pc + 2)
+
+                self.reg[reg_a] += self.reg[reg_b]
             elif IR == PUSH:
                 # grab the register operand
                 reg = self.ram_read(self.pc + 1)
@@ -123,9 +133,28 @@ class CPU:
                 self.reg[SP] -= 1
                 # Copy the value from the given register to RAM at the SP index
                 self.ram_write(self.reg[SP], val)
+            elif IR == POP:
+                # grab the address of where to store the value in register
+                reg = self.ram_read(self.pc + 1)
+                # get the last value in the stack
+                last_value = self.ram_read(self.reg[SP])
+                # assign that value in the register at the provided address
+                self.reg[reg] = last_value
+                # increment the SP
+                self.reg[SP] += 1
+            elif IR == CALL:
+                self.reg[SP] -= 1
+                self.ram_write(self.reg[SP], self.pc + 2)
+                reg = self.ram_read(self.pc+1)
+                self.pc = self.reg[reg]
+            elif IR == RET:
+                self.pc = self.ram_read(self.reg[SP])
+                self.reg[SP] += 1
             elif IR == HLT:
                 sys.exit(0)
             else:
                 print(f"I did not understand that command: {IR}")
                 sys.exit(1)
-            self.pc += operand_count + 1
+
+            if sets_pc == 0:
+                self.pc += operand_count + 1
