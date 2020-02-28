@@ -15,6 +15,9 @@ CMP = 167
 JEQ = 85
 JNE = 86
 JMP = 84
+PRA = 72
+INC = 101
+DEC = 102
 SUB = None
 DIV = None
 
@@ -78,13 +81,13 @@ class CPU:
         elif op == CMP:
             if self.reg[reg_a] == self.reg[reg_b]:
                 # set the E flag to 1
-                self.FL = self.FL | 0b00000001
+                self.FL = 0b00000001
             elif self.reg[reg_a] < self.reg[reg_b]:
                 # set the L flag to 1
-                self.FL = self.FL | 0b00000100
+                self.FL = 0b00000100
             elif self.reg[reg_a] > self.reg[reg_b]:
                 # set the G flag to 1
-                self.FL = self.FL | 0b00000010
+                self.FL = 0b00000010
         elif op == SUB:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == DIV:
@@ -121,9 +124,11 @@ class CPU:
             # Instruction Register, contains a copy of the currently executing instruction
             IR = self.ram_read(self.pc)
             # Grab AA of the program instruction for the operand count
-            # Grab C of the program instruction for if the instruction sets PC counter
             operand_count = IR >> 6
+            # Grab C of the program instruction for if the instruction sets PC counter
             sets_pc = IR >> 4 & 0b0001
+            # Grab B of the program instruction for if the instruction is an ALU command
+            is_alu = IR >> 5 & 0b001
 
             if IR == LDI:
                 address = self.ram_read(self.pc + 1)
@@ -136,7 +141,7 @@ class CPU:
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
-            elif IR == MUL or IR == ADD or IR == CMP:
+            elif is_alu == 1:
                 reg_a = self.ram_read(self.pc + 1)
                 reg_b = self.ram_read(self.pc + 2)
                 self.alu(IR, reg_a, reg_b)
@@ -189,6 +194,9 @@ class CPU:
                 # Jump to the address stored in the given register.
                 # Set the PC to the address stored in the given register.
                 self.pc = self.reg[reg]
+
+            elif IR == INC:
+                pass
             elif IR == HLT:
                 sys.exit(0)
             else:
