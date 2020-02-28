@@ -4,6 +4,7 @@ import sys
 
 HLT = 1
 LDI = 130
+LD = 131
 PRN = 71
 MUL = 162
 PUSH = 69
@@ -72,7 +73,7 @@ class CPU:
         # MDR =  Memory Data Register, contains the data that was read or the data to write
         self.ram[MAR] = MDR
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, op, reg_a, reg_b=None):
         """ALU operations."""
         if op == ADD:
             self.reg[reg_a] += self.reg[reg_b]
@@ -88,6 +89,12 @@ class CPU:
             elif self.reg[reg_a] > self.reg[reg_b]:
                 # set the G flag to 1
                 self.FL = 0b00000010
+        elif op == INC:
+            # increment the value in the given register
+            self.reg[reg_a] += 1
+        elif op == DEC:
+            # decrement the value in the given register
+            self.reg[reg_a] -= 1
         elif op == SUB:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == DIV:
@@ -123,6 +130,7 @@ class CPU:
         while True:
             # Instruction Register, contains a copy of the currently executing instruction
             IR = self.ram_read(self.pc)
+            # AABCDDDD
             # Grab AA of the program instruction for the operand count
             operand_count = IR >> 6
             # Grab C of the program instruction for if the instruction sets PC counter
@@ -136,15 +144,28 @@ class CPU:
                 # store the data
                 self.reg[address] = value
                 # increment the PC by 3 to skip the arguments
+
+            elif IR == LD:
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(self.pc + 2)
+                # Loads registerA with the value at the memory address stored in registerB
+                # self.ram_write(reg_a, self.reg[reg_b])
+                self.reg[reg_a] = self.reg[reg_b]
+
             elif IR == PRN:
                 data = self.ram_read(self.pc + 1)
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
+
             elif is_alu == 1:
-                reg_a = self.ram_read(self.pc + 1)
-                reg_b = self.ram_read(self.pc + 2)
-                self.alu(IR, reg_a, reg_b)
+                if operand_count == 2:
+                    reg_a = self.ram_read(self.pc + 1)
+                    reg_b = self.ram_read(self.pc + 2)
+                    self.alu(IR, reg_a, reg_b)
+                else:
+                    reg_a = self.ram_read(self.pc + 1)
+                    self.alu(IR, reg_a)
             elif IR == PUSH:
                 # grab the register operand
                 reg = self.ram_read(self.pc + 1)
@@ -154,6 +175,7 @@ class CPU:
                 self.reg[SP] -= 1
                 # Copy the value from the given register to RAM at the SP index
                 self.ram_write(self.reg[SP], val)
+
             elif IR == POP:
                 # grab the address of where to store the value in register
                 reg = self.ram_read(self.pc + 1)
@@ -163,14 +185,17 @@ class CPU:
                 self.reg[reg] = last_value
                 # increment the SP
                 self.reg[SP] += 1
+
             elif IR == CALL:
                 self.reg[SP] -= 1
                 self.ram_write(self.reg[SP], self.pc + 2)
                 reg = self.ram_read(self.pc + 1)
                 self.pc = self.reg[reg]
+
             elif IR == RET:
                 self.pc = self.ram_read(self.reg[SP])
                 self.reg[SP] += 1
+
             elif IR == JEQ:
                 # get the 1st operand, the register address
                 reg = self.ram_read(self.pc + 1)
@@ -180,6 +205,7 @@ class CPU:
                     self.pc = self.reg[reg]
                 else:
                     self.pc += operand_count + 1
+
             elif IR == JNE:
                 # get the 1st operand, the register address
                 reg = self.ram_read(self.pc + 1)
@@ -189,14 +215,21 @@ class CPU:
                     self.pc = self.reg[reg]
                 else:
                     self.pc += operand_count + 1
+
             elif IR == JMP:
                 reg = self.ram_read(self.pc + 1)
                 # Jump to the address stored in the given register.
                 # Set the PC to the address stored in the given register.
                 self.pc = self.reg[reg]
 
-            elif IR == INC:
-                pass
+            elif IR == PRA:
+                # get the 1st operand, the register address
+                reg = self.ram_read(self.pc + 1)
+                # Print to the console the ASCII character corresponding to the value in the register.
+                # print(self.reg[reg])
+                # print(self.ram_read(self.reg[reg]))
+                print(chr(self.ram_read(self.reg[reg])))
+
             elif IR == HLT:
                 sys.exit(0)
             else:
