@@ -11,6 +11,10 @@ POP = 70
 CALL = 80
 ADD = 160
 RET = 17
+CMP = 167
+JEQ = 85
+JNE = 86
+JMP = 84
 SUB = None
 DIV = None
 
@@ -28,6 +32,8 @@ class CPU:
         self.pc = 0
         # Stack Pointer, initialized 1 spot above the beginning of stack when empty
         self.reg[SP] = 0xF4
+        # Flags register
+        self.FL = 0b00000000
 
     def load(self):
         """Load a program into memory."""
@@ -65,11 +71,20 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
         if op == ADD:
             self.reg[reg_a] += self.reg[reg_b]
         elif op == MUL:
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == CMP:
+            if self.reg[reg_a] == self.reg[reg_b]:
+                # set the E flag to 1
+                self.FL = self.FL | 0b00000001
+            elif self.reg[reg_a] < self.reg[reg_b]:
+                # set the L flag to 1
+                self.FL = self.FL | 0b00000100
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                # set the G flag to 1
+                self.FL = self.FL | 0b00000010
         elif op == SUB:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == DIV:
@@ -121,7 +136,7 @@ class CPU:
                 # print the data
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
-            elif IR == MUL or IR == ADD:
+            elif IR == MUL or IR == ADD or IR == CMP:
                 reg_a = self.ram_read(self.pc + 1)
                 reg_b = self.ram_read(self.pc + 2)
                 self.alu(IR, reg_a, reg_b)
@@ -146,11 +161,34 @@ class CPU:
             elif IR == CALL:
                 self.reg[SP] -= 1
                 self.ram_write(self.reg[SP], self.pc + 2)
-                reg = self.ram_read(self.pc+1)
+                reg = self.ram_read(self.pc + 1)
                 self.pc = self.reg[reg]
             elif IR == RET:
                 self.pc = self.ram_read(self.reg[SP])
                 self.reg[SP] += 1
+            elif IR == JEQ:
+                # get the 1st operand, the register address
+                reg = self.ram_read(self.pc + 1)
+                # if the E flag is true
+                if self.FL & 0b00000001 == 1:
+                    # jump to the address stored at the given register
+                    self.pc = self.reg[reg]
+                else:
+                    self.pc += operand_count + 1
+            elif IR == JNE:
+                # get the 1st operand, the register address
+                reg = self.ram_read(self.pc + 1)
+                # if the E flag is false
+                if self.FL & 0b00000001 == 0:
+                    # jump to the address stored at the given register
+                    self.pc = self.reg[reg]
+                else:
+                    self.pc += operand_count + 1
+            elif IR == JMP:
+                reg = self.ram_read(self.pc + 1)
+                # Jump to the address stored in the given register.
+                # Set the PC to the address stored in the given register.
+                self.pc = self.reg[reg]
             elif IR == HLT:
                 sys.exit(0)
             else:
