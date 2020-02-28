@@ -122,10 +122,9 @@ class CPU:
                 print(self.reg[data])
                 # increment the PC by 2 to skip the argument
             elif IR == MUL or IR == ADD:
-                op = IR
                 reg_a = self.ram_read(self.pc + 1)
                 reg_b = self.ram_read(self.pc + 2)
-                self.alu(op, reg_a, reg_b)
+                self.alu(IR, reg_a, reg_b)
             elif IR == PUSH:
                 # grab the register operand
                 reg = self.ram_read(self.pc + 1)
