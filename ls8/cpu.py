@@ -1,7 +1,10 @@
 """CPU functionality."""
 
 import sys
-
+NOP = 0
+AND = 0b10101000
+NOT = 0b01101001
+XOR = 0b10101011
 HLT = 1
 LDI = 130
 LD = 131
@@ -95,6 +98,12 @@ class CPU:
         elif op == DEC:
             # decrement the value in the given register
             self.reg[reg_a] -= 1
+        elif op == AND:
+            self.reg[reg_a] &= self.reg[reg_b]
+        elif op == NOT:
+            self.reg[reg_a] = ~self.reg[reg_a]
+        elif op == XOR:
+            self.reg[reg_a] ^= self.reg[reg_b]
         elif op == SUB:
             self.reg[reg_a] -= self.reg[reg_b]
         elif op == DIV:
@@ -149,8 +158,8 @@ class CPU:
                 reg_a = self.ram_read(self.pc + 1)
                 reg_b = self.ram_read(self.pc + 2)
                 # Loads registerA with the value at the memory address stored in registerB
-                # self.ram_write(reg_a, self.reg[reg_b])
-                self.reg[reg_a] = self.reg[reg_b]
+                # self.reg[reg_a] = self.reg[reg_b]
+                self.reg[reg_a] = self.ram_read(self.reg[reg_b])
 
             elif IR == PRN:
                 data = self.ram_read(self.pc + 1)
@@ -225,10 +234,12 @@ class CPU:
             elif IR == PRA:
                 # get the 1st operand, the register address
                 reg = self.ram_read(self.pc + 1)
-                # Print to the console the ASCII character corresponding to the value in the register.
-                # print(self.reg[reg])
-                # print(self.ram_read(self.reg[reg]))
-                print(chr(self.ram_read(self.reg[reg])))
+                # Print to the console the ASCII character corresponding to the value in the RAM.
+                # print(chr(self.ram_read(self.reg[reg])), end="")
+                print(chr(self.reg[reg]), end="")
+
+            elif IR == NOP:
+                self.pc += 0
 
             elif IR == HLT:
                 sys.exit(0)
